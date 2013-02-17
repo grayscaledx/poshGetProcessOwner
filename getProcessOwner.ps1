@@ -22,12 +22,27 @@ param(
 
 BEGIN {
     $ComputerProcesses = $ComputerName | ForEach-Object { Get-WmiObject -ComputerName $ComputerName win32_process }
+    $processContainer = @()
 }
 PROCESS {
     foreach ($TargetComputer in $ComputerProcesses){
-        Write-Output $TargetComputer
+        <#Write-Output $TargetComputer
+        $TargetComputer | ForEach-Object {Write-Output $_.GetOwner().User, $_.CommandLine, $_.ProcessName}
+        Add-Member -InputObject $obj -MemberType NoteProperty -Name ProcessOwner -Value $TargetComputer.GetOwner().User
+        Add-Member -InputObject $obj -MemberType NoteProperty -Name ProcessName -Value $TargetComputer.ProcessName
+        Add-Member -InputObject $obj -MemberType NoteProperty -Name CommandLine -Value $TargetComputer.CommandLine#>
+        $processProps = @{
+                            'ProcessOwner'=$TargetComputer.GetOwner().User;
+                            'ProcessName'=$TargetComputer.ProcessName;
+                            'CommandLine'=$TargetComputer.CommandLine
+                         }
+        $processObj = New-Object -TypeName psobject -Property $processProps
+        $processContainer += $processObj
+
     }
 }
-END {}
+END {
+    Write-Output $processContainer | Format-Table -Property ProcessOwner,ProcessName, Commandline
+}
 
 }
