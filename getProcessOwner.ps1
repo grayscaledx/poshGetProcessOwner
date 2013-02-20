@@ -43,6 +43,17 @@ PROCESS {
                                  }
                 $processObj = New-Object -TypeName psobject -Property $processProps
                 $processContainer += $processObj
+                
+                <#
+                Found the way to compare running process IDs and service IDs to filter for services
+                running under a user context using Compare-Object
+                
+                $processes = Get-Wmiobject -ComputerName <computerName> win32_process
+                $services = Get-Wmiobject -ComputerName <computerName> win32_service
+                $servicePids = Compare-Object $processes.ProcessID $services.ProcessID -IncludeEqual -ExcludeDifferent | Sort-Object -Property InputObject | Select-Object -ExpandProperty InputObject
+                
+                $servicePids will contain a sorted list of process IDs of services.  This is only required to tie to user $processes.GetOwner().User for services user ownership.
+                #>
 
             }
         }
