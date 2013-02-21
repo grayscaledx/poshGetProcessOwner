@@ -19,18 +19,21 @@ param(
     [Parameter(HelpMessage="A target computer host name or IP address to query.",
                ValueFromPipeline=$True,
                ValueFromPipelineByPropertyName=$True)]
-    [string[]]$ComputerName = 'localhost'
+    [string[]]$ComputerName = 'localhost',
+    [Parameter(HelpMessage="A valid username to check processes against.")]
+    $UserAccount = $null
 )
 
 
 BEGIN {
     Write-Verbose "Initializing results object..."
     $processContainer = @()
+    Write-Verbose "User Account is null: $($UserAccount -eq $null)"
 }
 PROCESS {
         foreach ($CurrentComputer in $ComputerName){
 
-            Write-Verbose "Querying host $CurrentComputer for processes via WMI..."
+            Write-Verbose "Querying target $CurrentComputer for processes via WMI..."
             $CurrentProcesses = Get-WmiObject -ComputerName $CurrentComputer win32_process
 
             Write-Verbose "Processes Received; Building Query Object..."
@@ -38,6 +41,7 @@ PROCESS {
                 $processProps = @{
                                     'ProcessOwner'=$ComputerProcess.GetOwner().User;
                                     'ProcessName'=$ComputerProcess.ProcessName;
+                                    'ProcessID'=$ComputerProcess.ProcessID;
                                     'CommandLine'=$ComputerProcess.CommandLine;
                                     'ComputerName'=$ComputerProcess.PSComputerName
                                  }
