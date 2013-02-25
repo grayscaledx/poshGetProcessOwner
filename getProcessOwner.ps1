@@ -21,7 +21,9 @@ param(
                ValueFromPipelineByPropertyName=$True)]
     [string[]]$ComputerName = 'localhost',
     [Parameter(HelpMessage="A valid username to check processes against.")]
-    $UserAccount = $null
+    $UserAccount = $null,
+    [Parameter(HelpMessage="Enable if you want to filter for service ownership only")]
+    [switch]$ServicesOnly
 )
 
 
@@ -33,17 +35,34 @@ BEGIN {
 PROCESS {
         foreach ($CurrentComputer in $ComputerName){
 
+            Write-Verbose "Querying target $CurrentComputer for running services via WMI..."
+            $CurrentServices = Get-WmiObject -ComputerName $CurrentComputer win32_service
+            
             Write-Verbose "Querying target $CurrentComputer for processes via WMI..."
             $CurrentProcesses = Get-WmiObject -ComputerName $CurrentComputer win32_process
 
             Write-Verbose "Processes Received; Building Query Object..."
             foreach ($ComputerProcess in $CurrentProcesses){           
+                
+                #Write-Debug "ComputerProcess PID is $($ComputerProcess.ProcessID) and type is $($ComputerProcess.ProcessID.GetType().Fullname)"
+                #Write-Debug "ComputerServices PIDs are $($CurrentServices.ProcessID) and type is $($CurrentServices.ProcessID.GetType().Fullname)"
+                #Write-Debug "Is the current process ID in the service pool? $($CurrentServices.ProcessID -contains $ComputerProcess.ProcessID)`n`n"
+
+                #Write-Verbose "Checking if ProcessID $ComputerProcess.ProcessID is a service..."
+                if ($CurrentServices.ProcessID -contains $ComputerProcess.ProcessID){
+                    Write-Verbose "ProcessID $($ComputerProcess.ProcessID) `/ $($ComputerProcess.ProcessName) is a service..."
+                    $isService = $True
+                } else {
+                    $isService = $False
+                }
+                
                 $processProps = @{
                                     'ProcessOwner'=$ComputerProcess.GetOwner().User;
                                     'ProcessName'=$ComputerProcess.ProcessName;
                                     'ProcessID'=$ComputerProcess.ProcessID;
                                     'CommandLine'=$ComputerProcess.CommandLine;
                                     'ComputerName'=$ComputerProcess.PSComputerName
+                                    'IsService'=$isService
                                  }
                 $processObj = New-Object -TypeName psobject -Property $processProps
                 $processContainer += $processObj
