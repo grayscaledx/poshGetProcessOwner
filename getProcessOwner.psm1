@@ -98,6 +98,8 @@ PROCESS {
         }
         
 }
-END {}
+END { Write-Output $processContainer }
 
 }
+
+# Export-ModuleMember -Function <functionName(s)> -Variable <variableNameNo$>
