@@ -44,7 +44,8 @@ param(
                ValueFromPipelineByPropertyName=$True)]
     [string[]]$ComputerName = 'localhost',
     [Parameter(HelpMessage="A valid username to check processes against.")]
-    $UserAccount = $null
+    $UserAccount = $null,
+    [switch]$ShowProgress
 )
 
 
