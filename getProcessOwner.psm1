@@ -56,6 +56,7 @@ param(
     [Parameter(HelpMessage="A target computer host name or IP address to query.",
                ValueFromPipeline=$True,
                ValueFromPipelineByPropertyName=$True)]
+    [Alias('Name')]
     [string[]]$ComputerName = 'localhost',
     [Parameter(HelpMessage="A valid username to check processes against.")]
     $UserAccount = $null,
