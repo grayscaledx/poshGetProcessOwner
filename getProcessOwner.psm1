@@ -69,8 +69,8 @@ BEGIN {
 
     Write-Verbose "User Account is null: $($UserAccount -eq $null)"
 
-    $computerPercentage = (100 / ($ComputerName.count) -as [int])
-    $percentComplete = 0
+    #$computerPercentage = (100 / ($ComputerName.count) -as [int])
+    #$percentComplete = 0
 
     Write-Verbose "Initializing local error variable for logging..."
     $execError = @()
@@ -84,17 +84,17 @@ PROCESS {
 
             try{
 
-                    if ($ShowProgress) { Write-Progress -Activity "Querying processes on $CurrentComputer ..." -PercentComplete $percentComplete }
+                    if ($ShowProgress) { Write-Progress -Activity "Querying $($CurrentComputer) ..." -CurrentOperation "Getting $CurrentComputer processes via WMI..." <#-PercentComplete $percentComplete#> }
                     Write-Verbose "Querying target $CurrentComputer for processes via WMI..."
                     
                     $CurrentProcesses = Get-WmiObject -ComputerName $CurrentComputer win32_process -ErrorAction Stop -ErrorVariable execError
 
-                    if ($ShowProgress) { Write-Progress -Activity "Querying services on $CurrentComputer ..." -PercentComplete $percentComplete }
+                    if ($ShowProgress) { Write-Progress -Activity "Querying $($CurrentComputer) ..."  -CurrentOperation "Getting $CurrentComputer services via WMI..." <#-PercentComplete $percentComplete#> }
                     Write-Verbose "Querying target $CurrentComputer for running services via WMI..."
                     
                     $CurrentServices = Get-WmiObject -ComputerName $CurrentComputer win32_service -ErrorAction Stop -ErrorVariable execError
             
-                    if ($ShowProgress) { Write-Progress -Activity "Appending process owner data from $CurrentComputer to PSObject ..." -PercentComplete $percentComplete }
+                    if ($ShowProgress) { Write-Progress -Activity "Querying $($CurrentComputer) ..."  -CurrentOperation "Building output..." <#-PercentComplete $percentComplete#> }
                     Write-Verbose "Processes Received; Building Query Object..."
                     
                     foreach ($ComputerProcess in $CurrentProcesses){           
