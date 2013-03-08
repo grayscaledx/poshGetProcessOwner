@@ -1,6 +1,6 @@
 ﻿$logLocation = "$env:HOMEDRIVE$env:HOMEPATH`\GDX-GetProcessOwnerLog.txt"
 
-Function Get-ProcessOwner{
+Function Get-GDXProcessOwner{
 <#
 .SYNOPSIS
 Queries target computer for current processes and collects process owners, process name, and command line arguments used for execution.
@@ -100,10 +100,14 @@ PROCESS {
                     foreach ($ComputerProcess in $CurrentProcesses){           
 
                         if ($CurrentServices.ProcessID -contains $ComputerProcess.ProcessID){
+                            
                             Write-Verbose "ProcessID $($ComputerProcess.ProcessID) `/ $($ComputerProcess.ProcessName) is a service..."
                             $isService = $True
+                            
                         } else {
+                            
                             $isService = $False
+                            
                         }
                 
                         $processProps = @{
@@ -111,9 +115,10 @@ PROCESS {
                                             'ProcessName'=$ComputerProcess.ProcessName;
                                             'ProcessID'=$ComputerProcess.ProcessID;
                                             'CommandLine'=$ComputerProcess.CommandLine;
-                                            'ComputerName'=$ComputerProcess.PSComputerName
+                                            'ComputerName'=$ComputerProcess.PSComputerName;
                                             'IsService'=$isService
                                          }
+
                         $processObj = New-Object -TypeName psobject -Property $processProps
                         $processObj.PSObject.TypeNames.Insert(0,'GDX.ProcessOwner')
                         $processContainer += $processObj
